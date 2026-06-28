@@ -5,7 +5,8 @@ const NOTIFY_SECONDS = parseInt(process.env.PORTER_NOTIFY_SECONDS || 30);
 
 // ── Priority score for porter selection ──────────────────────
 // Factors: bag count, bag weight, seniority (experience), rating
-const getPorterPriorityScore = (porter, bagCount, bagWeight) => {
+// booking parameter added so we can check is_senior + is_woman_solo
+const getPorterPriorityScore = (porter, bagCount, bagWeight, booking = {}) => {
   let score = 0;
 
   // 1. Bag weight capability
@@ -22,8 +23,24 @@ const getPorterPriorityScore = (porter, bagCount, bagWeight) => {
   // 3. Rating bonus
   score += (parseFloat(porter.rating) || 0) * 5; // up to +25
 
-  // 4. Lower current load preferred
+  // 4. Senior citizen / woman travelling alone → highest rated porter
+  //    Give a massive boost to high-rated porters for these cases
+  if (booking.is_senior || booking.is_woman_solo) {
+    score += (parseFloat(porter.rating) || 0) * 10; // double rating weight
+    score += porter.experience_years * 3;            // extra experience weight
+    // Female porter gets extra priority for woman travelling alone
+    if (booking.is_woman_solo && porter.gender === 'female') {
+      score += 50; // strong preference for female porter
+    }
+  }
+
+  // 5. Lower current load preferred
   score += porter.is_on_job ? -10 : 0;
+
+  // 6. Trolley-capable porter for trolley bookings
+  if (booking.needs_trolley && porter.has_trolley) {
+    score += 30;
+  }
 
   return score;
 };
@@ -48,7 +65,7 @@ const getEligiblePorters = async (booking) => {
 
   // Apply priority scoring
   const scored = result.rows
-    .map(p => ({ ...p, priorityScore: getPorterPriorityScore(p, bag_count, bag_weight) }))
+    .map(p => ({ ...p, priorityScore: getPorterPriorityScore(p, bag_count, bag_weight, booking) }))
     .filter(p => p.priorityScore >= 0)
     .sort((a, b) => b.priorityScore - a.priorityScore);
 

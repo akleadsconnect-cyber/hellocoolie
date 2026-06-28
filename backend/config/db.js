@@ -16,16 +16,23 @@ const pool = new Pool(
 const initDB = async () => {
   const fs = require('fs');
   const path = require('path');
-  const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-  try {
-    await pool.query(schema);
-    console.log('✅ DB schema initialized');
-  } catch (err) {
-    // Tables may already exist — check for critical errors only
-    if (!err.message.includes('already exists')) {
-      console.error('❌ DB init error:', err.message);
-    } else {
-      console.log('✅ DB tables already exist');
+  // Run both schema files
+  const schemas = ['schema.sql', 'schema_v2.sql'];
+  for (const file of schemas) {
+    const filePath = path.join(__dirname, file);
+    if (!fs.existsSync(filePath)) continue;
+    const schema = fs.readFileSync(filePath, 'utf8');
+    try {
+      await pool.query(schema);
+      console.log(`✅ ${file} initialized`);
+    } catch (err) {
+      if (!err.message.includes('already exists') &&
+          !err.message.includes('duplicate') &&
+          !err.message.includes('does not exist')) {
+        console.error(`❌ ${file} error:`, err.message);
+      } else {
+        console.log(`✅ ${file} — tables exist`);
+      }
     }
   }
 };

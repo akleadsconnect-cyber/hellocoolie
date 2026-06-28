@@ -116,6 +116,22 @@ cron.schedule('0 * * * *', async () => {
   } catch (err) { console.error('Cron reactivate error:', err.message); }
 });
 
+// Dispatch pre-scheduled bookings — every minute
+cron.schedule('* * * * *', async () => {
+  try {
+    const { scheduledBookingService } = require('./services/missingFeatures');
+    await scheduledBookingService.dispatchScheduledBookings(io);
+  } catch (err) { console.error('Cron scheduled dispatch error:', err.message); }
+});
+
+// Check dispute SLA breaches — every 15 minutes
+cron.schedule('*/15 * * * *', async () => {
+  try {
+    const { disputeService } = require('./services/missingFeatures');
+    await disputeService.checkSLABreaches(io);
+  } catch (err) { console.error('Cron dispute SLA error:', err.message); }
+});
+
 // Offline fee recovery attempts — daily at 6 AM
 cron.schedule('0 6 * * *', async () => {
   try {
