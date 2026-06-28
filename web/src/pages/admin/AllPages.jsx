@@ -2,7 +2,7 @@
 //  pages/admin/UsersPage.jsx
 // ═══════════════════════════════════════════════════════════
 import React, { useState, useCallback } from 'react';
-import { DataTable, statusBadge, fmt, toast, useConfirm } from '../../components/shared';
+import { DataTable, Modal, statusBadge, fmt, toast, useConfirm } from '../../components/shared';
 import { useData } from '../../hooks/useAuth';
 import api from '../../services/api';
 
@@ -105,7 +105,6 @@ export function BookingsPage() {
 // ═══════════════════════════════════════════════════════════
 //  pages/admin/DisputesPage.jsx
 // ═══════════════════════════════════════════════════════════
-import { Modal } from '../../components/shared';
 
 export function DisputesPage({ isViewer = false }) {
   const [status, setStatus]     = useState('open');

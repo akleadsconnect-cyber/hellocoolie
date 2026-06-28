@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 
 // ── SIDEBAR ────────────────────────────────────────────────
 export function Sidebar({ activePage, onNavigate, alerts = {} }) {

@@ -2,6 +2,9 @@
   "name": "hellocoolie-web",
   "version": "2.0.0",
   "private": true,
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
@@ -9,7 +12,8 @@
     "react-router-dom": "^6.23.1",
     "recharts": "^2.12.7",
     "socket.io-client": "^4.7.5",
-    "axios": "^1.7.2"
+    "axios": "^1.7.2",
+    "ajv": "^8.12.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -17,8 +21,7 @@
     "test": "react-scripts test"
   },
   "browserslist": {
-    "production": [">0.2%","not dead","not op_mini all"],
-    "development": ["last 1 chrome version","last 1 firefox version","last 1 safari version"]
-  },
-  "proxy": "http://localhost:5000"
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+  }
 }

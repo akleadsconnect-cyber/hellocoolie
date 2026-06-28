@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { toast } from '../components/shared';
+import { useAuth } from '../../hooks/useAuth';
+import { toast } from '../../components/shared';
 
 export default function LoginPage() {
   const { login } = useAuth();
