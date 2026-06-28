@@ -59,7 +59,7 @@ const getEligiblePorters = async (booking) => {
        AND p.status = 'approved'
        AND p.is_active = TRUE
        AND p.id != ALL($2::uuid[])
-     ORDER BY p.total_bookings ASC, p.rating DESC`,  -- round robin base: fewest bookings first
+     ORDER BY p.total_bookings ASC, p.rating DESC`,
     [arrival_station, notified_porter_ids.length ? notified_porter_ids : [null]]
   );
 
