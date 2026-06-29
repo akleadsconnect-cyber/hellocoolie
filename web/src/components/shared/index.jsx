@@ -4,67 +4,93 @@ import { useAuth } from '../../hooks/useAuth';
 // ── SIDEBAR ────────────────────────────────────────────────
 export function Sidebar({ activePage, onNavigate, alerts = {} }) {
   const { user, logout } = useAuth();
-  const isAdmin  = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin';
 
   const adminNav = [
-    { id: 'dashboard',  icon: '📊', label: 'Dashboard' },
-    { id: 'stations',   icon: '🚉', label: 'Stations' },
-    { id: 'bookings',   icon: '📋', label: 'All Bookings' },
-    { id: 'porters',    icon: '🔴', label: 'Porter Management', badge: alerts.pendingPorters },
-    { id: 'users',      icon: '👤', label: 'Passenger Management' },
-    { id: 'fraud',      icon: '🚨', label: 'Fraud Alerts', badge: alerts.fraudFlags },
-    { id: 'disputes',   icon: '⚖️',  label: 'Disputes', badge: alerts.openDisputes },
-    { id: 'sos',        icon: '🆘', label: 'SOS Alerts', badge: alerts.activeSOS },
-    { id: 'surge',      icon: '💹', label: 'Surge Pricing' },
-    { id: 'offline',    icon: '💵', label: 'Offline Fee Recovery' },
-    { id: 'viewers',    icon: '👁️',  label: 'Viewer Accounts' },
-    { id: 'i18n',       icon: '🌐', label: 'App Strings (i18n)' },
+    { section: 'Overview' },
+    { id:'dashboard', icon:'📊', label:'Dashboard' },
+    { id:'stations',  icon:'🚉', label:'Stations' },
+    { id:'bookings',  icon:'📋', label:'All Bookings' },
+    { section: 'People' },
+    { id:'porters',   icon:'🔴', label:'Porter Management', badge: alerts.pendingPorters },
+    { id:'users',     icon:'👤', label:'Passengers' },
+    { section: 'Operations' },
+    { id:'fraud',     icon:'🚨', label:'Fraud Alerts',   badge: alerts.fraudFlags },
+    { id:'disputes',  icon:'⚖️', label:'Disputes',       badge: alerts.openDisputes },
+    { id:'sos',       icon:'🆘', label:'SOS Alerts',     badge: alerts.activeSOS },
+    { id:'stalled',   icon:'⏳', label:'Stalled Bookings' },
+    { section: 'Finance' },
+    { id:'surge',     icon:'💹', label:'Surge Pricing' },
+    { id:'offline',   icon:'💵', label:'Offline Fees' },
+    { section: 'Settings' },
+    { id:'viewers',   icon:'👁️', label:'Viewer Accounts' },
+    { id:'i18n',      icon:'🌐', label:'App Strings' },
   ];
 
   const viewerNav = [
-    { id: 'search',     icon: '🔍', label: 'Search Booking' },
-    { id: 'disputes',   icon: '⚖️',  label: 'My Disputes', badge: alerts.myDisputes },
-    { id: 'stalled',    icon: '⏳', label: 'Stalled Bookings' },
-    { id: 'sos',        icon: '🆘', label: 'SOS Alerts', badge: alerts.activeSOS },
+    { section: 'Tools' },
+    { id:'search',   icon:'🔍', label:'Search Booking' },
+    { id:'disputes', icon:'⚖️', label:'My Disputes',      badge: alerts.myDisputes },
+    { id:'stalled',  icon:'⏳', label:'Stalled Bookings' },
+    { id:'sos',      icon:'🆘', label:'SOS Alerts',       badge: alerts.activeSOS },
   ];
 
   const nav = isAdmin ? adminNav : viewerNav;
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
-        <img src="/logo.png" alt="HelloCoolie" style={{ height: 40 }} />
+      {/* Logo */}
+      <div style={{ padding:'16px 18px', borderBottom:'1px solid var(--gray-100)' }}>
+        <img src="/logo.png" alt="HelloCoolie" style={{ height:38, objectFit:'contain' }}/>
       </div>
 
-      <nav className="sidebar-nav">
-        <div className="nav-section">
-          {isAdmin ? 'Admin Portal' : 'Viewer Portal'}
-        </div>
-        {nav.map(item => (
-          <button
-            key={item.id}
-            className={`nav-item ${activePage === item.id ? 'active' : ''}`}
-            onClick={() => onNavigate(item.id)}
-          >
-            <span className="nav-icon">{item.icon}</span>
-            {item.label}
-            {!!item.badge && item.badge > 0 && (
-              <span className="nav-badge">{item.badge}</span>
-            )}
-          </button>
-        ))}
+      {/* Nav */}
+      <nav style={{ flex:1, overflowY:'auto', padding:'10px 10px' }}>
+        {nav.map((item, i) => {
+          if (item.section) return (
+            <div key={i} style={{ fontSize:'0.65rem', fontWeight:800, color:'#C4C4C4', textTransform:'uppercase', letterSpacing:'0.1em', padding:'14px 10px 5px', marginTop: i===0?0:4 }}>
+              {item.section}
+            </div>
+          );
+          const active = activePage === item.id;
+          return (
+            <button key={item.id} onClick={() => onNavigate(item.id)} style={{
+              display:'flex', alignItems:'center', gap:10,
+              width:'100%', padding:'9px 10px', borderRadius:8,
+              border:'none', cursor:'pointer', textAlign:'left',
+              marginBottom:2, fontFamily:'Inter,sans-serif',
+              fontSize:'0.855rem', fontWeight: active?600:500,
+              background: active ? 'linear-gradient(135deg,#FFF4ED,#FFE8D6)' : 'transparent',
+              color: active ? '#D4621A' : '#4B5563',
+              boxShadow: active ? 'inset 2px 0 0 #F47920' : 'none',
+              transition:'all 0.12s',
+            }}
+            onMouseEnter={e=>{ if(!active) e.currentTarget.style.background='#F9FAFB'; }}
+            onMouseLeave={e=>{ if(!active) e.currentTarget.style.background='transparent'; }}
+            >
+              <span style={{ fontSize:'1rem', width:20, flexShrink:0 }}>{item.icon}</span>
+              <span style={{ flex:1 }}>{item.label}</span>
+              {!!item.badge && item.badge > 0 && (
+                <span style={{ background:'#EF4444', color:'white', fontSize:'0.65rem', fontWeight:800, padding:'1px 6px', borderRadius:999, minWidth:18, textAlign:'center' }}>
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </nav>
 
-      <div className="sidebar-footer">
-        <div className="sidebar-user" onClick={logout}>
-          <div className="avatar avatar-orange">
-            {user?.name?.[0] || 'A'}
+      {/* User */}
+      <div style={{ padding:'12px', borderTop:'1px solid var(--gray-100)' }}>
+        <div onClick={logout} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 10px', borderRadius:10, cursor:'pointer', transition:'background 0.12s' }}
+          onMouseEnter={e=>e.currentTarget.style.background='#FFF4ED'}
+          onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+          <div style={{ width:34, height:34, borderRadius:999, background:'linear-gradient(135deg,#F47920,#D4621A)', display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontWeight:800, fontSize:'0.9rem', flexShrink:0 }}>
+            {user?.name?.[0]?.toUpperCase()||'A'}
           </div>
-          <div>
-            <div className="sidebar-user-name">{user?.name}</div>
-            <div className="sidebar-user-role">
-              {isAdmin ? '👑 Admin' : '👁️ Viewer'} · Sign out
-            </div>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontWeight:700, fontSize:'0.82rem', color:'#111827', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user?.name}</div>
+            <div style={{ fontSize:'0.7rem', color:'#9CA3AF' }}>{isAdmin?'👑 Admin':'👁️ Viewer'} · Sign out</div>
           </div>
         </div>
       </div>
