@@ -73,6 +73,16 @@ const getEligiblePorters = async (booking) => {
 };
 
 // ── Notify next porter in queue ──────────────────────────────
+// Generate fixed OTP for a phone number (deterministic - same phone = same OTP always)
+const generateFixedOTP = (phone) => {
+  const digits = (phone || '').replace(/\D/g, '');
+  let hash = 0;
+  for (let i = 0; i < digits.length; i++) {
+    hash = (hash * 31 + parseInt(digits[i])) % 900000;
+  }
+  return (100000 + hash).toString();
+};
+
 const notifyNextPorter = async (bookingId, io) => {
   const bookingRes = await pool.query('SELECT * FROM bookings WHERE id = $1', [bookingId]);
   const booking = bookingRes.rows[0];
@@ -187,8 +197,8 @@ const acceptBooking = async (bookingId, porterId, io) => {
     const pRes = await client.query('SELECT * FROM porters WHERE id = $1', [porterId]);
     const porter = pRes.rows[0];
 
-    // Generate OTP for job start
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate FIXED OTP per user phone (same phone = same OTP always, like Rapido)
+    const otp = generateFixedOTP(booking.traveller_phone);
 
     await client.query(
       `UPDATE bookings SET
