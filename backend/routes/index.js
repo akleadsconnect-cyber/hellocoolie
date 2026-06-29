@@ -189,3 +189,18 @@ router.get('/health', (req, res) => res.json({
 }));
 
 module.exports = router;
+
+// ── ONE-TIME SEED (remove after first use) ─────────────────
+router.get('/seed-init', async (req, res) => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const { pool } = require('../config/db');
+    const hash = await bcrypt.hash('Admin@123', 10);
+    await pool.query(`
+      INSERT INTO admins (name, email, pan_no, date_of_birth, password_hash, role)
+      VALUES ('Akshay Rai', 'admin@hellocoolie.in', 'ABCPA1234A', '1995-01-01', $1, 'admin')
+      ON CONFLICT (email) DO UPDATE SET password_hash = $1
+    `, [hash]);
+    res.json({ message: '✅ Admin seeded! Email: admin@hellocoolie.in | Password: Admin@123' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
