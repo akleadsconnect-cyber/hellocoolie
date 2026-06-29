@@ -248,3 +248,30 @@ exports.getOfflineFeesPending = async (req, res) => {
     res.json({ pending: result.rows });
   } catch (err) { res.status(500).json({ error: err.message }); }
 };
+
+// ══ VIEWER MANAGEMENT ═════════════════════════════════════════
+exports.getViewers = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, name, email, is_active, created_at,
+        (SELECT COUNT(*) FROM disputes WHERE assigned_to = viewers.id AND status='open') as open_disputes
+       FROM viewers ORDER BY created_at DESC`
+    );
+    res.json({ viewers: result.rows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+};
+
+exports.updateViewerStatus = async (req, res) => {
+  try {
+    const { is_active } = req.body;
+    await pool.query('UPDATE viewers SET is_active=$1 WHERE id=$2', [is_active, req.params.id]);
+    res.json({ message: `Viewer ${is_active ? 'activated' : 'deactivated'}` });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+};
+
+exports.deleteViewer = async (req, res) => {
+  try {
+    await pool.query('DELETE FROM viewers WHERE id=$1', [req.params.id]);
+    res.json({ message: 'Viewer deleted' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+};
