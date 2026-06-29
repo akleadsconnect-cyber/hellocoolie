@@ -66,44 +66,149 @@ function OfflineFeesPage() {
 function ViewersPage() {
   const [form, setForm] = useState({ name:'', email:'', pan_no:'', date_of_birth:'', password:'' });
   const [loading, setLoading] = useState(false);
+  const [viewers, setViewers] = useState([]);
+  const [tab, setTab] = useState('list');
+
+  useEffect(() => { loadViewers(); }, []);
+
+  const loadViewers = async () => {
+    const r = await api.get('/admin/viewers');
+    if (r.ok) setViewers(r.viewers || []);
+  };
+
   const handleCreate = async () => {
     if (!form.name||!form.email||!form.pan_no||!form.date_of_birth||!form.password) { toast('Fill all fields','warn'); return; }
     setLoading(true);
     const r = await api.createViewer(form);
     setLoading(false);
-    if (r.ok) { toast('✅ Viewer account created!'); setForm({ name:'',email:'',pan_no:'',date_of_birth:'',password:'' }); }
+    if (r.ok) {
+      toast('✅ Viewer account created!');
+      setForm({ name:'',email:'',pan_no:'',date_of_birth:'',password:'' });
+      loadViewers();
+      setTab('list');
+    } else toast(r.error,'error');
+  };
+
+  const toggleStatus = async (id, current) => {
+    const r = await api.patch(`/admin/viewers/${id}/status`, { is_active: !current });
+    if (r.ok) { toast(r.message); loadViewers(); }
     else toast(r.error,'error');
   };
+
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`Delete viewer "${name}"? Cannot be undone.`)) return;
+    const r = await api.del(`/admin/viewers/${id}`);
+    if (r.ok) { toast('✅ Viewer deleted'); loadViewers(); }
+    else toast(r.error,'error');
+  };
+
   return (
     <div className="animate-fade">
-      <div className="card" style={{ maxWidth: 520 }}>
-        <div className="card-header"><h4>Create Viewer Account</h4></div>
-        <div className="card-body">
-          <div className="alert alert-info" style={{marginBottom:20}}>
-            Viewer accounts can search bookings, investigate disputes, and handle SOS alerts. They cannot access financial data or permanently suspend accounts.
-          </div>
-          {[
-            { label:'Full Name', key:'name', type:'text', placeholder:'Viewer full name' },
-            { label:'Email Address', key:'email', type:'email', placeholder:'viewer@hellocoolie.in' },
-            { label:'PAN Number (for password reset)', key:'pan_no', type:'text', placeholder:'ABCDE1234F' },
-            { label:'Date of Birth (for password reset)', key:'date_of_birth', type:'date', placeholder:'' },
-            { label:'Initial Password', key:'password', type:'password', placeholder:'Min 8 characters' },
-          ].map(f=>(
-            <div className="form-group" key={f.key}>
-              <label>{f.label}</label>
-              <input type={f.type} placeholder={f.placeholder} value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} />
-            </div>
-          ))}
-          <button className="btn btn-primary btn-full" onClick={handleCreate} disabled={loading}>
-            {loading?<><span className="spinner"/>Creating...</>:'Create Viewer Account'}
-          </button>
-        </div>
+      {/* Tabs */}
+      <div className="d-flex gap-2 mb-4">
+        <button onClick={()=>setTab('list')} className={`btn btn-sm ${tab==='list'?'btn-primary':'btn-outline-secondary'}`}>
+          👥 All Viewers ({viewers.length})
+        </button>
+        <button onClick={()=>setTab('create')} className={`btn btn-sm ${tab==='create'?'btn-primary':'btn-outline-secondary'}`}>
+          ➕ Create Viewer
+        </button>
       </div>
+
+      {/* LIST TAB */}
+      {tab === 'list' && (
+        <div className="card">
+          <div className="card-header"><h4>Viewer Accounts</h4></div>
+          <div className="card-body p-0">
+            {viewers.length === 0 ? (
+              <div className="text-center text-muted py-5">
+                <div style={{fontSize:48}}>👁️</div>
+                <p>No viewer accounts yet.</p>
+                <button className="btn btn-primary btn-sm" onClick={()=>setTab('create')}>Create First Viewer</button>
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-hover mb-0 align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Open Disputes</th>
+                      <th>Created</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {viewers.map(v => (
+                      <tr key={v.id}>
+                        <td><strong>{v.name}</strong></td>
+                        <td>{v.email}</td>
+                        <td><span className="badge bg-warning text-dark">{v.open_disputes||0}</span></td>
+                        <td>{new Date(v.created_at).toLocaleDateString('en-IN')}</td>
+                        <td>
+                          <span className={`badge ${v.is_active?'bg-success':'bg-secondary'}`}>
+                            {v.is_active?'✅ Active':'⏸ Inactive'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="d-flex gap-2">
+                            <button
+                              onClick={()=>toggleStatus(v.id, v.is_active)}
+                              className={`btn btn-sm ${v.is_active?'btn-outline-warning':'btn-outline-success'}`}>
+                              {v.is_active?'Deactivate':'Activate'}
+                            </button>
+                            <button
+                              onClick={()=>handleDelete(v.id, v.name)}
+                              className="btn btn-sm btn-outline-danger">
+                              🗑 Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* CREATE TAB */}
+      {tab === 'create' && (
+        <div className="card" style={{ maxWidth: 520 }}>
+          <div className="card-header"><h4>Create Viewer Account</h4></div>
+          <div className="card-body">
+            <div className="alert alert-info mb-4">
+              Viewer accounts can search bookings, investigate disputes, and handle SOS alerts. They cannot access financial data or permanently suspend accounts.
+            </div>
+            {[
+              { label:'Full Name', key:'name', type:'text', placeholder:'Viewer full name' },
+              { label:'Email Address', key:'email', type:'email', placeholder:'viewer@hellocoolie.in' },
+              { label:'PAN Number (for password reset)', key:'pan_no', type:'text', placeholder:'ABCDE1234F' },
+              { label:'Date of Birth (for password reset)', key:'date_of_birth', type:'date' },
+              { label:'Initial Password', key:'password', type:'password', placeholder:'Min 8 characters' },
+            ].map(f => (
+              <div className="mb-3" key={f.key}>
+                <label className="form-label fw-semibold">{f.label}</label>
+                <input
+                  type={f.type} className="form-control"
+                  placeholder={f.placeholder||''}
+                  value={form[f.key]}
+                  onChange={e=>setForm(x=>({...x,[f.key]:e.target.value}))}/>
+              </div>
+            ))}
+            <button onClick={handleCreate} disabled={loading} className="btn btn-primary w-100 mt-2">
+              {loading?'Creating...':'Create Viewer Account'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// ── i18n page ──────────────────────────────────────────────
+
 function I18nPage() {
   const [lang, setLang] = useState('hi');
   const [editKey, setEditKey] = useState('');
