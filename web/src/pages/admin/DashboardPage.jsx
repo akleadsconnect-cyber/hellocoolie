@@ -58,15 +58,15 @@ export default function DashboardPage() {
     { name:'Suspended', value: parseInt(stats.porters?.suspended||0),  color: R },
   ] : [];
 
+  const s = stats || {};
+
   if (loading) return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'60vh', gap:16 }}>
-      <div style={{ width:48, height:48, borderRadius:'50%', border:`3px solid #E5E7EB`, borderTopColor: O, animation:'spin 0.8s linear infinite' }}/>
+      <div style={{ width:48, height:48, borderRadius:'50%', border:'3px solid #E5E7EB', borderTopColor: O, animation:'spin 0.8s linear infinite' }}/>
       <div style={{ color:'#6B7280', fontSize:'0.9rem' }}>Loading dashboard...</div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   );
-
-  const s = stats || {};
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
