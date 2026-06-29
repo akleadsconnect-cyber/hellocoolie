@@ -313,3 +313,25 @@ tbody tr:hover td { background: var(--gray-50); }
 ::-webkit-scrollbar-track { background: var(--gray-50); }
 ::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gray-300); }
+
+/* ── LOGIN PAGE INPUTS ── */
+.login-input {
+  width: 100%;
+  padding: 13px 14px 13px 42px;
+  background: #F9FAFB;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  color: #111827;
+  font-size: 0.9rem;
+  font-family: Inter, sans-serif;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.login-input:focus {
+  border-color: #F47920 !important;
+  box-shadow: 0 0 0 3px rgba(244, 121, 32, 0.12);
+  background: white;
+}
+.login-input::placeholder { color: #9CA3AF; }
+.login-input-pass { padding-right: 44px; }

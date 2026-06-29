@@ -17,13 +17,8 @@ const labelStyle = {
   fontWeight:700, marginBottom:7,
   textTransform:'uppercase', letterSpacing:'0.06em',
 };
-const inputStyle = {
-  width:'100%', padding:'13px 14px 13px 42px',
-  background:'#F9FAFB', border:'1.5px solid #E5E7EB',
-  borderRadius:10, color:'#111827',
-  fontSize:'0.9rem', fontFamily:'Inter,sans-serif',
-  outline:'none', boxSizing:'border-box', transition:'border-color 0.15s',
-};
+// Input styles moved to CSS class .login-input in index.css
+const inputStyle = null; // unused - use className="login-input" 
 const iconSpan = {
   position:'absolute', left:14, top:'50%',
   transform:'translateY(-50%)', fontSize:'1rem', pointerEvents:'none',
@@ -59,8 +54,7 @@ export default function LoginPage() {
   }, []); // empty deps — only runs once
 
   const resetErr = () => setError('');
-  const focusIn  = e => e.target.style.borderColor = '#F47920';
-  const focusOut = e => e.target.style.borderColor = '#E5E7EB';
+  // No JS focus handlers - handled via CSS
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -263,7 +257,7 @@ export default function LoginPage() {
               <input type="email" placeholder={role==='admin'?'admin@hellocoolie.in':'viewer@hellocoolie.in'}
                 value={email} onChange={e=>setEmail(e.target.value)}
                 autoComplete="email"
-                style={inputStyle} onFocus={focusIn} onBlur={focusOut}/>
+                className="login-input"/>
             </div>
           </div>
 
@@ -274,7 +268,7 @@ export default function LoginPage() {
               <input type={showPass?'text':'password'} placeholder="Your password"
                 value={password} onChange={e=>setPassword(e.target.value)}
                 autoComplete="current-password"
-                style={{...inputStyle,paddingRight:44}} onFocus={focusIn} onBlur={focusOut}/>
+                className="login-input login-input-pass"/>
               <button type="button" onClick={()=>setShowPass(p=>!p)} style={{ position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'1rem',padding:4,color:'#9CA3AF' }}>
                 {showPass?'🙈':'👁️'}
               </button>
@@ -329,7 +323,7 @@ export default function LoginPage() {
               <span style={iconSpan}>📧</span>
               <input type="email" placeholder={role==='admin'?'admin@hellocoolie.in':'viewer@hellocoolie.in'}
                 value={forgotId} onChange={e=>setForgotId(e.target.value)} autoFocus
-                style={inputStyle} onFocus={focusIn} onBlur={focusOut}/>
+                className="login-input"/>
             </div>
           </div>
           <div style={{ marginBottom:24 }}>
@@ -338,7 +332,7 @@ export default function LoginPage() {
               <span style={iconSpan}>🪪</span>
               <input type="text" placeholder="e.g. ABCDE1234F"
                 value={verifyField} onChange={e=>setVerifyField(e.target.value.toUpperCase())}
-                style={inputStyle} onFocus={focusIn} onBlur={focusOut}/>
+                className="login-input"/>
             </div>
           </div>
           <SubmitBtn label="Verify Identity →"/>
@@ -371,7 +365,7 @@ export default function LoginPage() {
               <span style={iconSpan}>🔒</span>
               <input type={showPass?'text':'password'} placeholder="Minimum 6 characters"
                 value={newPass} onChange={e=>setNewPass(e.target.value)} autoFocus
-                style={{...inputStyle,paddingRight:44}} onFocus={focusIn} onBlur={focusOut}/>
+                className="login-input login-input-pass"/>
               <button type="button" onClick={()=>setShowPass(p=>!p)} style={{ position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'1rem',padding:4 }}>
                 {showPass?'🙈':'👁️'}
               </button>
@@ -401,7 +395,7 @@ export default function LoginPage() {
               <span style={iconSpan}>🔒</span>
               <input type={showPass?'text':'password'} placeholder="Re-enter new password"
                 value={confirmPass} onChange={e=>setConfirmPass(e.target.value)}
-                style={inputStyle} onFocus={focusIn} onBlur={focusOut}/>
+                className="login-input"/>
             </div>
           </div>
 
