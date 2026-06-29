@@ -130,6 +130,9 @@ adminRouter.get('/surge',                     admin.getSurgeConfigs);
 adminRouter.post('/surge',                    admin.createSurgeConfig);
 // Viewer management
 adminRouter.post('/viewers',                  admin.createViewer);
+adminRouter.get('/viewers',                   admin.getViewers);
+adminRouter.patch('/viewers/:id/status',      admin.updateViewerStatus);
+adminRouter.delete('/viewers/:id',            admin.deleteViewer);
 // Offline fee recovery
 adminRouter.get('/offline-fees-pending',      admin.getOfflineFeesPending);
 // SOS management

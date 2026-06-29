@@ -76,4 +76,7 @@ const api = {
   upsertString:    (data) => api.req('POST', '/admin/strings', data),
 };
 
+api.patch = (url, body) => req(url, { method: 'PATCH', body: JSON.stringify(body) });
+api.delete = (url) => req(url, { method: 'DELETE' });
+
 export default api;
