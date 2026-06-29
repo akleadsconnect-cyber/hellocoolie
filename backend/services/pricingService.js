@@ -60,28 +60,48 @@ const calculateFare = async ({ cityTier = 'y', bagCount, bagWeight, dropLocation
   const porterAmount = subtotal - platformFee;
   const totalAmount  = subtotal;
 
-  // Two porter suggestion
+  // Two porter logic — 5+ bags: fare is DOUBLED (2 base fares + bags split per porter)
   const twoPorterSuggested = bagCount >= 5;
 
+  // If two porter accepted, double the base fare and each porter carries half bags
+  let finalBaseFare   = baseFare;
+  let finalBagFare    = bagFare;
+  let finalSubtotal   = subtotal;
+  let porterCount     = 1;
+
+  if (twoPorterSuggested) {
+    // 2 porters = 2x base fare, bag fare stays same (shared between porters)
+    finalBaseFare  = baseFare * 2;
+    finalSubtotal  = finalBaseFare + finalBagFare + distanceFare;
+    porterCount    = 2;
+  }
+
+  const finalPlatformFee  = Math.round(finalSubtotal * platformFeePct / 100);
+  const finalPorterAmount = finalSubtotal - finalPlatformFee; // total porter earnings (split between 2)
+  const finalTotal        = finalSubtotal;
+
   return {
-    baseFare,
-    bagFare,
+    baseFare:      finalBaseFare,
+    bagFare:       finalBagFare,
     distanceFare,
-    subtotal,
+    subtotal:      finalSubtotal,
     platformFeePct,
-    platformFee,
-    porterAmount,
-    totalAmount,
+    platformFee:   finalPlatformFee,
+    porterAmount:  finalPorterAmount,
+    totalAmount:   finalTotal,
     seasonType,
     cityTier,
     twoPorterSuggested,
+    porterCount,
     breakdown: {
-      base:     `₹${baseFare}`,
-      bags:     `₹${bagFarePerBag} × ${bagCount} bags = ₹${bagFare}`,
+      base:     twoPorterSuggested ? `₹${baseFare} × 2 porters = ₹${finalBaseFare}` : `₹${baseFare}`,
+      bags:     `₹${bagFarePerBag} × ${bagCount} bags = ₹${finalBagFare}`,
       distance: `₹${distanceFare}`,
-      platform: `${platformFeePct}% = ₹${platformFee}`,
-      total:    `₹${totalAmount}`,
-      porter:   `₹${porterAmount} (${100 - platformFeePct}%)`,
+      platform: `${platformFeePct}% = ₹${finalPlatformFee}`,
+      total:    `₹${finalTotal}`,
+      porter:   twoPorterSuggested
+        ? `₹${finalPorterAmount} total (₹${Math.round(finalPorterAmount/2)} each porter)`
+        : `₹${finalPorterAmount}`,
     },
   };
 };
