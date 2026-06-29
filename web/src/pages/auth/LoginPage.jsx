@@ -163,7 +163,7 @@ export default function LoginPage() {
 
       {/* LIVE stats from API */}
       <div style={{ display:'flex',gap:14,position:'relative',zIndex:1,flexWrap:'wrap',justifyContent:'center',width:'100%' }}>
-        {stats ? [
+        {(stats ? [
           { val: `₹${Number(stats.revenue?.total||0).toLocaleString('en-IN')}`, label:'Platform Revenue' },
           { val: stats.bookings?.total || '0',                                   label:'Total Bookings' },
           { val: stats.porters?.approved || '0',                                 label:'Active Porters' },
@@ -173,8 +173,7 @@ export default function LoginPage() {
           { val:'—', label:'Total Bookings' },
           { val:'—', label:'Active Porters' },
           { val:'—', label:'Passengers' },
-        ]}
-        .map((s,i) => (
+        ]).map((statItem,i) => (
           <div key={i} style={{
             background:'rgba(255,255,255,0.15)',
             backdropFilter:'blur(10px)',
@@ -184,10 +183,10 @@ export default function LoginPage() {
             minWidth:'calc(50% - 7px)', flex:'1 1 calc(50% - 7px)',
           }}>
             <div style={{ fontSize:'1.5rem',fontWeight:900,color:'white',fontFamily:'Nunito,sans-serif',lineHeight:1 }}>
-              {s.val}
+              {statItem.val}
             </div>
             <div style={{ fontSize:'0.72rem',color:'rgba(255,255,255,0.8)',marginTop:5,fontWeight:500 }}>
-              {s.label}
+              {statItem.label}
             </div>
             {stats && <div style={{ width:4,height:4,borderRadius:'50%',background:'rgba(255,255,255,0.6)',margin:'6px auto 0',boxShadow:'0 0 6px rgba(255,255,255,0.8)' }}/>}
           </div>
