@@ -1,7 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from '../../components/shared';
 import api from '../../services/api';
+
+// Fetch stats ONCE outside component to avoid re-render loops
+let cachedStats = null;
+const fetchStats = async () => {
+  if (cachedStats) return cachedStats;
+  const r = await api.getStats();
+  if (r.ok) { cachedStats = r.data; return r.data; }
+  return null;
+};
 
 const labelStyle = {
   display:'block', color:'#374151', fontSize:'0.78rem',
@@ -38,14 +47,16 @@ export default function LoginPage() {
   const [newPass,     setNewPass]     = useState('');
   const [confirmPass, setConfirmPass] = useState('');
 
-  // Live stats from API
-  const [stats, setStats] = useState(null);
+  // Live stats from API — fetched once, no re-render loop
+  const [stats, setStats] = useState(cachedStats);
 
   useEffect(() => {
-    api.getStats().then(r => {
-      if (r.ok) setStats(r.data);
-    });
-  }, []);
+    if (!cachedStats) {
+      fetchStats().then(data => {
+        if (data) setStats(data);
+      });
+    }
+  }, []); // empty deps — only runs once
 
   const resetErr = () => setError('');
   const focusIn  = e => e.target.style.borderColor = '#F47920';
@@ -250,7 +261,8 @@ export default function LoginPage() {
             <div style={{ position:'relative' }}>
               <span style={iconSpan}>📧</span>
               <input type="email" placeholder={role==='admin'?'admin@hellocoolie.in':'viewer@hellocoolie.in'}
-                value={email} onChange={e=>setEmail(e.target.value)} autoFocus
+                value={email} onChange={e=>setEmail(e.target.value)}
+                autoComplete="email"
                 style={inputStyle} onFocus={focusIn} onBlur={focusOut}/>
             </div>
           </div>
@@ -261,6 +273,7 @@ export default function LoginPage() {
               <span style={iconSpan}>🔒</span>
               <input type={showPass?'text':'password'} placeholder="Your password"
                 value={password} onChange={e=>setPassword(e.target.value)}
+                autoComplete="current-password"
                 style={{...inputStyle,paddingRight:44}} onFocus={focusIn} onBlur={focusOut}/>
               <button type="button" onClick={()=>setShowPass(p=>!p)} style={{ position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'1rem',padding:4,color:'#9CA3AF' }}>
                 {showPass?'🙈':'👁️'}
