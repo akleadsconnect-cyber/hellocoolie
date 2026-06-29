@@ -214,7 +214,11 @@ const acceptBooking = async (bookingId, porterId, io) => {
 
     await client.query('COMMIT');
 
-    // Notify user — porter found! (contact revealed after OTP)
+    // Get porter phone to share with user immediately
+    const porterPhoneRes = await pool.query('SELECT phone FROM porters WHERE id = $1', [porterId]);
+    const porterPhone = porterPhoneRes.rows[0]?.phone;
+
+    // Notify user — contact shared IMMEDIATELY so they can find each other at station
     if (io) {
       io.to(`user_${booking.user_id}`).emit('porter_assigned', {
         bookingId,
@@ -223,26 +227,26 @@ const acceptBooking = async (bookingId, porterId, io) => {
           rating: porter.rating,
           totalBookings: porter.total_bookings,
           badgeNo: porter.badge_no,
-          // phone NOT revealed yet — only after OTP
+          phone: porterPhone,  // ✅ Share porter phone immediately
         },
-        otp,  // shown to user to give to porter
-        message: 'Your porter is on the way! Show OTP to porter when they arrive.'
+        otp,  // user shows OTP to porter to START the job officially
+        message: 'Porter found! Share OTP when porter arrives to start the job.'
       });
 
-      // Notify porter — traveller details (no phone yet)
+      // Notify porter — user contact shared IMMEDIATELY so porter can find them
       io.to(`porter_${porterId}`).emit('booking_confirmed', {
         bookingId,
         traveller: {
           name: booking.traveller_name,
+          phone: booking.traveller_phone,  // ✅ Share user phone immediately
           coach: booking.coach,
           seatNo: booking.seat_no,
           bags: booking.bag_count,
           bagWeight: booking.bag_weight,
           isSenior: booking.is_senior,
-          // phone revealed after OTP confirmation
         },
         fare: booking.porter_amount,
-        message: 'Booking confirmed! Go to coach and ask user for OTP.'
+        message: 'Booking confirmed! Contact shared. Go meet the traveller and ask for OTP to start job.'
       });
     }
 
