@@ -55,7 +55,10 @@ const api = {
   createSurge:     (data) => api.req('POST', '/admin/surge', data),
 
   // Viewer management
-  createViewer:    (data) => api.req('POST', '/admin/viewers', data),
+  createViewer:       (data) => api.req('POST', '/admin/viewers', data),
+  getViewers:         ()     => api.req('GET',  '/admin/viewers'),
+  updateViewerStatus: (id, is_active) => api.req('PATCH', `/admin/viewers/${id}/status`, { is_active }),
+  deleteViewer:       (id)   => api.req('DELETE', `/admin/viewers/${id}`),
 
   // Offline fees
   getOfflineFees:  () => api.req('GET', '/admin/offline-fees-pending'),
@@ -76,7 +79,6 @@ const api = {
   upsertString:    (data) => api.req('POST', '/admin/strings', data),
 };
 
-api.patch = (url, body) => req(url, { method: 'PATCH', body: JSON.stringify(body) });
-api.delete = (url) => req(url, { method: 'DELETE' });
+
 
 export default api;

@@ -72,8 +72,9 @@ function ViewersPage() {
   useEffect(() => { loadViewers(); }, []);
 
   const loadViewers = async () => {
-    const r = await api.get('/admin/viewers');
-    if (r.ok) setViewers(r.viewers || []);
+    const r = await api.getViewers();
+    if (r.ok) setViewers(r.data?.viewers || []);
+    
   };
 
   const handleCreate = async () => {
@@ -90,14 +91,14 @@ function ViewersPage() {
   };
 
   const toggleStatus = async (id, current) => {
-    const r = await api.patch(`/admin/viewers/${id}/status`, { is_active: !current });
-    if (r.ok) { toast(r.message); loadViewers(); }
+    const r = await api.updateViewerStatus(id, !current);
+    if (r.ok) { toast(r.data?.message || 'Done'); loadViewers(); }
     else toast(r.error,'error');
   };
 
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete viewer "${name}"? Cannot be undone.`)) return;
-    const r = await api.del(`/admin/viewers/${id}`);
+    const r = await api.deleteViewer(id);
     if (r.ok) { toast('✅ Viewer deleted'); loadViewers(); }
     else toast(r.error,'error');
   };
